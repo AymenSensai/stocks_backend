@@ -25,6 +25,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'register',
             'google-sign-in',
             'forgot-password',
+            'categories',
         ]);
         //
     })
