@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'products',
             'login',
             'register',
+            'google-sign-in',
             'forgot-password',
         ]);
         //
