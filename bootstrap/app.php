@@ -21,11 +21,15 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->validateCsrfTokens(except: [
             'products',
+            'products/*',
             'login',
             'register',
             'google-sign-in',
             'forgot-password',
             'categories',
+            'contacts',
+            'orders',
+            'orders/*',
         ]);
         //
     })

@@ -12,14 +12,14 @@ return new class extends Migration
     public function up()
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->string('image_path')->nullable();
+            $table->renameColumn('opening_stock', 'stock');
         });
     }
 
     public function down()
     {
         Schema::table('products', function (Blueprint $table) {
-            $table->dropColumn('image_path');
+            $table->renameColumn('stock', 'opening_stock');
         });
     }
 };

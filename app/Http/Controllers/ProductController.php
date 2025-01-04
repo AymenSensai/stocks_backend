@@ -12,7 +12,7 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $products = Product::all();
+        $products = Product::with(['category', 'orders'])->get();
 
         return response()->json([
             'message' => 'Products retrieved successfully',
@@ -28,9 +28,9 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'sku' => 'required|string|max:255',
-            'opening_stock' => 'required|numeric|min:0',
+            'stock' => 'required|numeric|min:0',
             'reorder_point' => 'required|numeric|min:0',
-            'category' => 'required|string|max:255',
+            'category_id' => 'required|exists:categories,id',
             'selling_price' => 'required|numeric|min:0',
             'cost_price' => 'required|numeric|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
@@ -38,8 +38,8 @@ class ProductController extends Controller
 
         // Handle image upload
         if ($request->hasFile('image')) {
-            $imagePath = $request->file('image')->store('products', 'public');
-            $validated['image'] = $imagePath;
+            $image = $request->file('image')->store('products', 'public');
+            $validated['image'] = $image;
         }
 
         // Retrieve the authenticated user
@@ -57,21 +57,21 @@ class ProductController extends Controller
     /**
      * Display the specified product.
      */
-    public function show($id)
-    {
-        $product = Product::find($id);
+     public function show($id)
+     {
+         $product = Product::with(['category', 'orders'])->find($id);
 
-        if (!$product) {
-            return response()->json([
-                'message' => 'Product not found'
-            ], 404);
-        }
+         if (!$product) {
+             return response()->json([
+                 'message' => 'Product not found'
+             ], 404);
+         }
 
-        return response()->json([
-            'message' => 'Product retrieved successfully',
-            'data' => $product
-        ], 200);
-    }
+         return response()->json([
+             'message' => 'Product retrieved successfully',
+             'data' => $product
+         ], 200);
+     }
 
     /**
      * Update the specified product in storage.
@@ -89,9 +89,9 @@ class ProductController extends Controller
         $validated = $request->validate([
             'name' => 'sometimes|required|string|max:255',
             'sku' => 'sometimes|required|string|max:255',
-            'opening_stock' => 'sometimes|required|numeric|min:0',
+            'stock' => 'sometimes|required|numeric|min:0',
             'reorder_point' => 'sometimes|required|numeric|min:0',
-            'category' => 'sometimes|required|string|max:255',
+            'category_id' => 'sometimes|required|exists:categories,id', // Validate category_id if provided
             'selling_price' => 'sometimes|required|numeric|min:0',
             'cost_price' => 'sometimes|required|numeric|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validation for image
@@ -104,8 +104,8 @@ class ProductController extends Controller
                 Storage::disk('public')->delete($product->image);
             }
 
-            $imagePath = $request->file('image')->store('products', 'public');
-            $validated['image'] = $imagePath;
+            $image = $request->file('image')->store('products', 'public');
+            $validated['image'] = $image;
         }
 
         $product->update($validated);
