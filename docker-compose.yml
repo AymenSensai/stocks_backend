@@ -9,7 +9,7 @@ services:
     volumes:
       - .:/var/www
     ports:
-      - "8000:9000"
+      - "8000:8000"
     networks:
       - laravel_network
     depends_on:
