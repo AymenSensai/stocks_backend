@@ -12,7 +12,9 @@ class OrderController extends Controller
 
     public function index()
     {
-        $orders = Order::with(['contact', 'products'])->get();
+        $orders = Order::with(['contact', 'products'])
+                       ->orderBy('transaction_date', 'asc')
+                       ->get();
 
         return response()->json([
             'message' => 'Orders retrieved successfully!',

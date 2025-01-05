@@ -40,7 +40,11 @@ class HomeController extends Controller
             ->groupBy('date')
             ->orderBy('date')
             ->get()
-            ->mapWithKeys(fn($item) => [$item->date => $item->sales_quantity]);
+            ->mapWithKeys(fn($item) => [$item->date => $item->sales_quantity])
+            ->all(); // Convert collection to array
+
+        // Ensure salesData is not an empty array
+        $salesData = !empty($salesData) ? $salesData : (object) [];
 
         // Purchase data mapped by date
         $purchaseData = DB::table('order_product')
@@ -50,14 +54,18 @@ class HomeController extends Controller
             ->groupBy('date')
             ->orderBy('date')
             ->get()
-            ->mapWithKeys(fn($item) => [$item->date => $item->purchase_quantity]);
+            ->mapWithKeys(fn($item) => [$item->date => $item->purchase_quantity])
+            ->all(); // Convert collection to array
+
+        // Ensure purchaseData is not an empty array
+        $purchaseData = !empty($purchaseData) ? $purchaseData : (object) [];
 
         // Return the data as JSON response
         return response()->json([
             'sold_quantities' => $data->sold_quantities ?? 0,
             'purchased_quantities' => $data->purchased_quantities ?? 0,
-            'earnings' => $data->earnings ?? 0.0,
-            'spendings' => $data->spendings ?? 0.0,
+            'earnings' => $data->earnings ?? "0",
+            'spendings' => $data->spendings ?? "0",
             'product_count' => $productCount,
             'contact_count' => $contactCount,
             'sales_data' => $salesData,
