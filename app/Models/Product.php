@@ -47,9 +47,7 @@ class Product extends Model
 
     public function getImageAttribute()
     {
-        return $this->attributes['image']
-            ? url('storage/' . $this->attributes['image'])
-            : null;
+        return $this->attributes['image'] ? $this->attributes['image'] : null;
     }
 
     public function calculateEarnings()

@@ -38,10 +38,13 @@ class ProductController extends Controller
 
         // Handle image upload
         if ($request->hasFile('image')) {
-            $image = $request->file('image')->store('products', 'public');
-            $validated['image'] = $image;
+            $image = $request->file('image');
+            // Upload image to Cloudinary
+            $uploadedImage = Cloudinary::upload($image->getRealPath(), [
+                'folder' => 'products', // Folder where images are stored in Cloudinary
+            ]);
+            $validated['image'] = $uploadedImage->getSecurePath(); // Store image URL
         }
-
         // Retrieve the authenticated user
         $user = $request->user();
 
@@ -99,13 +102,12 @@ class ProductController extends Controller
 
         // Handle image upload
         if ($request->hasFile('image')) {
-            // Delete the old image if it exists
-            if ($product->image) {
-                Storage::disk('public')->delete($product->image);
-            }
-
-            $image = $request->file('image')->store('products', 'public');
-            $validated['image'] = $image;
+            $image = $request->file('image');
+            // Upload image to Cloudinary
+            $uploadedImage = Cloudinary::upload($image->getRealPath(), [
+                'folder' => 'products', // Folder where images are stored in Cloudinary
+            ]);
+            $validated['image'] = $uploadedImage->getSecurePath(); // Store image URL
         }
 
         $product->update($validated);
