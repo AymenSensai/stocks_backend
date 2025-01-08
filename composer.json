@@ -7,7 +7,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
-        "cloudinary/cloudinary_php": "^3.0",
+        "cloudinary-labs/cloudinary-laravel": "^2.2",
         "google/apiclient": "^2.18",
         "laravel/framework": "^11.31",
         "laravel/sanctum": "^4.0",
