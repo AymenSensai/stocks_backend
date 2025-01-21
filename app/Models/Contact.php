@@ -9,16 +9,20 @@ class Contact extends Model
 {
     use HasFactory;
 
-    // Fillable attributes
     protected $fillable = [
         'name',
         'phone_number',
         'contact_type',
+        'user_id', // Add this for scoping contacts to users
     ];
 
-    // Optionally, add a mutator for phone_number (if needed for formatting)
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
     public function setPhoneNumberAttribute($value)
     {
-        $this->attributes['phone_number'] = preg_replace('/\D/', '', $value);  // removes non-digit characters
+        $this->attributes['phone_number'] = preg_replace('/\D/', '', $value);
     }
 }

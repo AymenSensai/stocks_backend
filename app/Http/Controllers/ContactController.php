@@ -8,11 +8,11 @@ use Illuminate\Http\Request;
 class ContactController extends Controller
 {
     /**
-     * Display a listing of the contacts.
+     * Display a listing of the contacts for the authenticated user.
      */
     public function index()
     {
-        $contacts = Contact::all();
+        $contacts = auth()->user()->contacts;
 
         return response()->json([
             'message' => 'Contacts retrieved successfully',
@@ -21,7 +21,7 @@ class ContactController extends Controller
     }
 
     /**
-     * Store a newly created contact in storage.
+     * Store a newly created contact for the authenticated user.
      */
     public function store(Request $request)
     {
@@ -31,7 +31,7 @@ class ContactController extends Controller
             'contact_type' => 'required|in:Customer,Vendor',
         ]);
 
-        $contact = Contact::create($validated);
+        $contact = auth()->user()->contacts()->create($validated);
 
         return response()->json([
             'message' => 'Contact created successfully',
@@ -40,11 +40,11 @@ class ContactController extends Controller
     }
 
     /**
-     * Display the specified contact.
+     * Display the specified contact for the authenticated user.
      */
     public function show($id)
     {
-        $contact = Contact::find($id);
+        $contact = auth()->user()->contacts()->find($id);
 
         if (!$contact) {
             return response()->json([
@@ -59,11 +59,11 @@ class ContactController extends Controller
     }
 
     /**
-     * Update the specified contact in storage.
+     * Update the specified contact for the authenticated user.
      */
     public function update(Request $request, $id)
     {
-        $contact = Contact::find($id);
+        $contact = auth()->user()->contacts()->find($id);
 
         if (!$contact) {
             return response()->json([
@@ -86,11 +86,11 @@ class ContactController extends Controller
     }
 
     /**
-     * Remove the specified contact from storage.
+     * Remove the specified contact for the authenticated user.
      */
     public function destroy($id)
     {
-        $contact = Contact::find($id);
+        $contact = auth()->user()->contacts()->find($id);
 
         if (!$contact) {
             return response()->json([

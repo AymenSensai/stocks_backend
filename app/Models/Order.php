@@ -14,6 +14,7 @@ class Order extends Model
         'contact_id',
         'transaction_date',
         'notes',
+        'user_id',
     ];
 
     // Relationships

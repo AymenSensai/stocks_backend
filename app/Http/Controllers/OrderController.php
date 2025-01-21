@@ -10,11 +10,13 @@ use Illuminate\Http\Request;
 class OrderController extends Controller
 {
 
-    public function index()
+    public function index(Request $request)
     {
+        $user = $request->user();
         $orders = Order::with(['contact', 'products'])
-                       ->orderBy('transaction_date', 'asc')
-                       ->get();
+            ->where('user_id', $user->id)
+            ->orderBy('transaction_date', 'asc')
+            ->get();
 
         return response()->json([
             'message' => 'Orders retrieved successfully!',
@@ -22,10 +24,9 @@ class OrderController extends Controller
         ]);
     }
 
-    // Store a newly created order
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'contact_id' => 'nullable|exists:contacts,id',
             'transaction_date' => 'required|date',
             'products' => 'required|array',
@@ -34,22 +35,22 @@ class OrderController extends Controller
             'notes' => 'nullable|string',
         ]);
 
-        // Create the order
-        $order = Order::create([
-            'contact_id' => $request->contact_id,
-            'transaction_date' => $request->transaction_date,
-            'notes' => $request->notes,
+        $order = $request->user()->orders()->create([
+            'contact_id' => $validated['contact_id'],
+            'transaction_date' => $validated['transaction_date'],
+            'notes' => $validated['notes'],
         ]);
 
-        // Attach products and adjust stock
-        foreach ($request->products as $product) {
+        foreach ($validated['products'] as $product) {
+            // Attach product to the order with the price field
+            $productModel = Product::find($product['id']);
             $order->products()->attach($product['id'], [
                 'quantity' => $product['quantity'],
+                'price' => $productModel->selling_price, // Use the product's price here
             ]);
 
-            // Update product stock
-            $productModel = Product::find($product['id']);
-            $productModel->stock += $product['quantity']; // Add positive or subtract negative quantity
+            // Update stock
+            $productModel->stock += $product['quantity'];
             $productModel->save();
         }
 
@@ -83,16 +84,21 @@ class OrderController extends Controller
             'notes' => $request->notes,
         ]);
 
-        // Sync products and adjust stock
+        // Prepare products and sync them with price data
         $products = [];
         foreach ($request->products as $product) {
-            $products[$product['id']] = ['quantity' => $product['quantity']];
-
             $productModel = Product::find($product['id']);
+            $products[$product['id']] = [
+                'quantity' => $product['quantity'],
+                'price' => $productModel->selling_price, // Use the product's price here
+            ];
+
+            // Adjust stock
             $productModel->stock += $product['quantity']; // Apply new stock change
             $productModel->save();
         }
 
+        // Sync the products with the order, including the price
         $order->products()->sync($products);
 
         return response()->json(['message' => 'Order updated successfully!', 'order' => $order]);

@@ -12,21 +12,17 @@ return new class extends Migration
     public function up()
     {
         Schema::create('products', function (Blueprint $table) {
-            $table->id(); // Auto-incrementing primary key
+            $table->id();
             $table->string('name');
-            $table->string('sku');
-            $table->decimal('opening_stock', 10, 2)->default(0);
-            $table->decimal('reorder_point', 10, 2)->default(0);
-            $table->unsignedBigInteger('category_id'); // Foreign key for the category
+            $table->string('sku')->unique();
+            $table->integer('stock')->default(0);
+            $table->integer('reorder_point')->default(0);
             $table->decimal('selling_price', 10, 2);
             $table->decimal('cost_price', 10, 2);
-            $table->string('image')->nullable(); // Path to the image
-            $table->unsignedBigInteger('user_id'); // Foreign key for the user
-            $table->timestamps(); // created_at, updated_at columns
-
-            // Foreign key constraints
-            $table->foreign('category_id')->references('id')->on('categories')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreignId('category_id')->nullable()->constrained()->onDelete('set null');
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
+            $table->string('image')->nullable();
+            $table->timestamps();
         });
     }
 

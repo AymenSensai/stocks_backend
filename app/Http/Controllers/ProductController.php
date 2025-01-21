@@ -12,9 +12,12 @@ class ProductController extends Controller
     /**
      * Display a listing of products.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $products = Product::with(['category', 'orders'])->get();
+        $user = $request->user();
+        $products = Product::with(['category', 'orders'])
+            ->where('user_id', $user->id)
+            ->get();
 
         return response()->json([
             'message' => 'Products retrieved successfully',
@@ -38,20 +41,15 @@ class ProductController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Handle image upload
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            // Upload image to Cloudinary
             $uploadedImage = Cloudinary::upload($image->getRealPath(), [
-                'folder' => 'products', // Folder where images are stored in Cloudinary
+                'folder' => 'products',
             ]);
-            $validated['image'] = $uploadedImage->getSecurePath(); // Store image URL
+            $validated['image'] = $uploadedImage->getSecurePath();
         }
-        // Retrieve the authenticated user
-        $user = $request->user();
 
-        // Create the product for the authenticated user
-        $product = $user->products()->create($validated);
+        $product = $request->user()->products()->create($validated);
 
         return response()->json([
             'message' => 'Product created successfully',
@@ -83,12 +81,12 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $product = Product::find($id);
+        $product = Product::where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->first();
 
         if (!$product) {
-            return response()->json([
-                'message' => 'Product not found'
-            ], 404);
+            return response()->json(['message' => 'Product not found'], 404);
         }
 
         $validated = $request->validate([
@@ -96,20 +94,18 @@ class ProductController extends Controller
             'sku' => 'sometimes|required|string|max:255',
             'stock' => 'sometimes|required|numeric|min:0',
             'reorder_point' => 'sometimes|required|numeric|min:0',
-            'category_id' => 'sometimes|required|exists:categories,id', // Validate category_id if provided
+            'category_id' => 'sometimes|required|exists:categories,id',
             'selling_price' => 'sometimes|required|numeric|min:0',
             'cost_price' => 'sometimes|required|numeric|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // Validation for image
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ]);
 
-        // Handle image upload
         if ($request->hasFile('image')) {
             $image = $request->file('image');
-            // Upload image to Cloudinary
             $uploadedImage = Cloudinary::upload($image->getRealPath(), [
-                'folder' => 'products', // Folder where images are stored in Cloudinary
+                'folder' => 'products',
             ]);
-            $validated['image'] = $uploadedImage->getSecurePath(); // Store image URL
+            $validated['image'] = $uploadedImage->getSecurePath();
         }
 
         $product->update($validated);
@@ -123,20 +119,18 @@ class ProductController extends Controller
     /**
      * Remove the specified product from storage.
      */
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
-        $product = Product::find($id);
+        $product = Product::where('id', $id)
+            ->where('user_id', $request->user()->id)
+            ->first();
 
         if (!$product) {
-            return response()->json([
-                'message' => 'Product not found'
-            ], 404);
+            return response()->json(['message' => 'Product not found'], 404);
         }
 
         $product->delete();
 
-        return response()->json([
-            'message' => 'Product deleted successfully'
-        ], 200);
+        return response()->json(['message' => 'Product deleted successfully'], 200);
     }
 }

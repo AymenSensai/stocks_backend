@@ -38,7 +38,7 @@ class CategoryController extends Controller
     }
 
     /**
-     * Display the specified category.
+     * Display the specified category for the authenticated user.
      */
     public function show($id)
     {
@@ -55,7 +55,7 @@ class CategoryController extends Controller
     }
 
     /**
-     * Update the specified category.
+     * Update the specified category for the authenticated user.
      */
     public function update(Request $request, $id)
     {
@@ -78,7 +78,7 @@ class CategoryController extends Controller
     }
 
     /**
-     * Remove the specified category.
+     * Remove the specified category for the authenticated user.
      */
     public function destroy($id)
     {
